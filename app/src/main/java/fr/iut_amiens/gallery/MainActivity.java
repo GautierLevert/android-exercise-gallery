@@ -1,7 +1,6 @@
 package fr.iut_amiens.gallery;
 
 import android.Manifest;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -89,16 +88,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (REQUEST_CAMERA == requestCode && RESULT_OK == resultCode) {
-            Picture picture = new Picture("", lastPicture);
-
-            ContentValues values = new ContentValues();
-            values.put("title", picture.getTitle());
-            values.put("content", picture.getContent().getAbsolutePath());
-
-            databaseOpenHelper.getWritableDatabase().insert("picture", null, values);
-
-            refresh();
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+            builder.setTitle("Add a note");
+            final android.widget.EditText editText = new android.widget.EditText(this);
+            editText.setSingleLine();
+            builder.setView(editText);
+            builder.setNegativeButton(android.R.string.cancel, null);
+            builder.setPositiveButton(android.R.string.ok, new android.content.DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(android.content.DialogInterface dialog, int which) {
+                    createPicture(editText.getText().toString(), lastPicture);
+                }
+            });
+            builder.create().show();
         }
+    }
+
+    private void createPicture(String title, File content) {
+        Picture picture = new Picture(title, content);
+
+        android.content.ContentValues values = new android.content.ContentValues();
+        values.put("title", picture.getTitle());
+        values.put("content", picture.getContent().getAbsolutePath());
+
+        databaseOpenHelper.getWritableDatabase().insert("picture", null, values);
+
+        refresh();
     }
 
     @Override
